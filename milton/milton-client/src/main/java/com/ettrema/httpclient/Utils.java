@@ -5,7 +5,6 @@ import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.exceptions.NotFoundException;
 import java.io.*;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -158,9 +157,9 @@ public class Utils {
                 case 400:
                     throw new BadRequestException(href);
                 case 401:
-                    throw new NotAuthorizedException(href);
+                    throw new NotAuthorizedException(href, null);
                 case 403:
-                    throw new NotAuthorizedException(href);
+                    throw new NotAuthorizedException(href, null);
                 case 404:
                     throw new NotFoundException(href);
                 case 405:

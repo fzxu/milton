@@ -28,19 +28,26 @@ public class DavPrincipals {
             this.qname = new QName( WebDavProtocol.NS_DAV.getName(), name );
             this.id = new PrincipleId() {
 
+                @Override
                 public QName getIdType() {
                     return qname;
                 }
 
+                @Override
                 public String getValue() {
                     return null;
                 }
             };
         }
 
+        @Override
         public PrincipleId getIdenitifer() {
             return id;
         }
+
+        public QName getQname() {
+            return qname;
+        }        
     }
 
     public static class AllDavPrincipal extends DavPrincipals.AbstractDavPrincipal {
@@ -49,6 +56,7 @@ public class DavPrincipals {
             super( "all" );
         }
 
+        @Override
         public boolean matches( Auth auth, Resource current ) {
             return true;
         }
@@ -60,6 +68,7 @@ public class DavPrincipals {
             super( "authenticated" );
         }
 
+        @Override
         public boolean matches( Auth auth, Resource current ) {
             return auth.getTag() != null;
         }
@@ -71,6 +80,7 @@ public class DavPrincipals {
             super( "unauthenticated" );
         }
 
+        @Override
         public boolean matches( Auth auth, Resource current ) {
             return auth.getTag() == null;
         }

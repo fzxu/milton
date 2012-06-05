@@ -47,7 +47,7 @@ public class SpringMiltonFilter implements javax.servlet.Filter {
     private String[] excludeMiltonPaths;
 
     @Override
-    public void init(FilterConfig fc) throws ServletException {        
+    public void init(FilterConfig fc) throws ServletException {
         StaticApplicationContext parent = new StaticApplicationContext();
         parent.getBeanFactory().registerSingleton("servletContext", fc.getServletContext());
         parent.refresh();
@@ -81,13 +81,15 @@ public class SpringMiltonFilter implements javax.servlet.Filter {
 
     @Override
     public void destroy() {
-        context.close();
+        if (context != null) {
+            context.close();
+        }
     }
 
-    private void doMiltonProcessing(HttpServletRequest req, HttpServletResponse resp) throws IOException {        
+    private void doMiltonProcessing(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             MiltonServlet.setThreadlocals(req, resp);
-            Request request = new com.bradmcevoy.http.ServletRequest(req,servletContext);
+            Request request = new com.bradmcevoy.http.ServletRequest(req, servletContext);
             Response response = new com.bradmcevoy.http.ServletResponse(resp);
             httpManager.process(request, response);
         } finally {
