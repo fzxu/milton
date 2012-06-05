@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2012 McEvoy Software Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package com.bradmcevoy.http;
 
 import com.bradmcevoy.http.http11.DefaultHttp11ResponseHandler;
@@ -47,7 +65,7 @@ public class SpringMiltonFilter implements javax.servlet.Filter {
     private String[] excludeMiltonPaths;
 
     @Override
-    public void init(FilterConfig fc) throws ServletException {
+    public void init(FilterConfig fc) throws ServletException {        
         StaticApplicationContext parent = new StaticApplicationContext();
         parent.getBeanFactory().registerSingleton("servletContext", fc.getServletContext());
         parent.refresh();
@@ -81,15 +99,13 @@ public class SpringMiltonFilter implements javax.servlet.Filter {
 
     @Override
     public void destroy() {
-        if (context != null) {
-            context.close();
-        }
+        context.close();
     }
 
-    private void doMiltonProcessing(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void doMiltonProcessing(HttpServletRequest req, HttpServletResponse resp) throws IOException {        
         try {
             MiltonServlet.setThreadlocals(req, resp);
-            Request request = new com.bradmcevoy.http.ServletRequest(req, servletContext);
+            Request request = new com.bradmcevoy.http.ServletRequest(req,servletContext);
             Response response = new com.bradmcevoy.http.ServletResponse(resp);
             httpManager.process(request, response);
         } finally {

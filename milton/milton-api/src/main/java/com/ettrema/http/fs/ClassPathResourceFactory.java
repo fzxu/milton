@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2012 McEvoy Software Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package com.ettrema.http.fs;
 
 import com.bradmcevoy.common.ContentTypeUtils;
@@ -131,7 +149,6 @@ public class ClassPathResourceFactory implements ResourceFactory {
 			}
 		}
 
-		@Override
 		public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException {
 			try {
 				IOUtils.copy(content, out);
@@ -140,12 +157,10 @@ public class ClassPathResourceFactory implements ResourceFactory {
 			}
 		}
 
-		@Override
 		public Long getMaxAgeSeconds(Auth auth) {
 			return maxAgeSeconds;
 		}
 
-		@Override
 		public String getContentType(String preferredList) {
 			String mime = ContentTypeUtils.findContentTypes(path.getName());
 			String s = ContentTypeUtils.findAcceptableContentType(mime, preferredList);
@@ -155,22 +170,18 @@ public class ClassPathResourceFactory implements ResourceFactory {
 			return s;
 		}
 
-		@Override
 		public Long getContentLength() {
 			return null;
 		}
 
-		@Override
 		public String getUniqueId() {
 			return null;
 		}
 
-		@Override
 		public String getName() {
 			return path.getName();
 		}
 
-		@Override
 		public Object authenticate(String user, String password) {
 			if (securityManager != null) {
 				return securityManager.authenticate(user, password);
@@ -179,7 +190,6 @@ public class ClassPathResourceFactory implements ResourceFactory {
 			}
 		}
 
-		@Override
 		public boolean authorise(Request request, Method method, Auth auth) {
 			if (securityManager != null) {
 				return securityManager.authorise(request, method, auth, this);
@@ -189,7 +199,6 @@ public class ClassPathResourceFactory implements ResourceFactory {
 
 		}
 
-		@Override
 		public String getRealm() {
 			if (securityManager != null) {
 				return securityManager.getRealm(host);
@@ -199,17 +208,14 @@ public class ClassPathResourceFactory implements ResourceFactory {
 
 		}
 
-		@Override
 		public Date getModifiedDate() {
 			return modifiedDate;
 		}
 
-		@Override
 		public String checkRedirect(Request request) {
 			return null;
 		}
 
-		@Override
 		public Object authenticate(DigestResponse digestRequest) {
 			if (securityManager != null) {
 				return securityManager.authenticate(digestRequest);
@@ -218,12 +224,10 @@ public class ClassPathResourceFactory implements ResourceFactory {
 			}
 		}
 
-		@Override
 		public boolean isDigestAllowed() {
 			return true;
 		}
 
-		@Override
 		public String processForm(Map<String, String> parameters, Map<String, FileItem> files) throws BadRequestException, NotAuthorizedException, ConflictException {
 			return null;
 		}
