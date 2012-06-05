@@ -17,10 +17,7 @@ import org.junit.Test;
 
 import com.bradmcevoy.common.Path;
 import com.ettrema.httpclient.Host;
-import com.ettrema.zsync.MetaFileMaker;
-import com.ettrema.zsync.SHA1;
-import com.ettrema.zsync.UploadMaker;
-import com.ettrema.zsync.UploadReader;
+import com.ettrema.httpclient.HttpResult;
 
 /**
  * Tests the complete ZSync upload procedure. 
@@ -74,10 +71,9 @@ public class IntegrationTests {
 		//Change to correct url of servercopy.txt
 		String url = host.getHref( Path.path( servercopy.getName() + "/.zsync" ) );
 		InputStream uploadIn = new FileInputStream( uploadFile );
-		
-		int result = host.doPut(url, uploadIn, uploadFile.length(), null, null );
+        HttpResult httpResult = host.doPut(url, uploadIn, uploadFile.length(), null, null );
 		uploadIn.close();
-		Assert.assertEquals( 204, result );
+		Assert.assertEquals( 204, httpResult.getStatusCode() );
 		System.out.println("");
 		System.out.println("");
 	}

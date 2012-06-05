@@ -127,8 +127,7 @@ public class ZSyncClient implements FileSyncer{
         InputStream uploadIn = null;
         try {
             uploadIn = umx.makeUpload();
-            long bytes = transferService.put(url, uploadIn, null, null, listener);
-            LogUtils.trace(log, "upload: transferred bytes", bytes);
+            transferService.put(url, uploadIn, null, null, listener);            
         } finally {
             IOUtils.closeQuietly(uploadIn);
             FileUtils.deleteQuietly(fRemoteMeta);
