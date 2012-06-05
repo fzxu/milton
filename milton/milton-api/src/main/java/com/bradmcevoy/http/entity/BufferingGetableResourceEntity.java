@@ -89,5 +89,4 @@ public class BufferingGetableResourceEntity extends GetableResourceEntity {
             IOUtils.closeQuietly(in); // make sure we close to delete temporary file
         }
     }
-
 }
