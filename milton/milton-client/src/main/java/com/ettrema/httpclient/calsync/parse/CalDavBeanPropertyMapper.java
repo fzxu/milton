@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,11 +56,13 @@ public class CalDavBeanPropertyMapper {
         this.propertyAccessor = propertyAccessor;
         mapOfMappers = new HashMap<Class, Mapper>();
         addMapper(Uid.class, new UidMapper());
+        addMapper(Location.class, new LocationMapper());
         addMapper(Summary.class, new SummaryMapper());
         addMapper(Description.class, new DescriptionMapper());
         addMapper(EndDate.class, new EndDateMapper());
         addMapper(StartDate.class, new StartDateMapper());
         addMapper(Timezone.class, new TimezoneMapper());
+        addMapper(Organizer.class, new OrganizerMapper());
     }
 
     private void addMapper(Class c, Mapper m) {
@@ -228,6 +231,47 @@ public class CalDavBeanPropertyMapper {
         }
     }
 
+    public class LocationMapper extends Mapper {
+
+        @Override
+        void mapToBean(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
+            VEvent vevent = event(cal);
+            String s = getPropValue(vevent.getLocation());
+            propertyAccessor.set(bean, pd.getWriteMethod(), s);
+        }
+
+        @Override
+        void mapToCard(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
+            String s = propertyAccessor.get(bean, pd.getReadMethod(), String.class);
+            VEvent vevent = event(cal);
+            net.fortuna.ical4j.model.property.Location d = new net.fortuna.ical4j.model.property.Location(s);
+            vevent.getProperties().add(d);
+        }
+    }    
+    
+    public class OrganizerMapper extends Mapper {
+
+        @Override
+        void mapToBean(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
+            VEvent vevent = event(cal);
+            String s = getPropValue(vevent.getOrganizer());
+            propertyAccessor.set(bean, pd.getWriteMethod(), s);
+        }
+
+        @Override
+        void mapToCard(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
+            String s = propertyAccessor.get(bean, pd.getReadMethod(), String.class);
+            VEvent vevent = event(cal);
+            net.fortuna.ical4j.model.property.Organizer d;
+            try {
+                d = new net.fortuna.ical4j.model.property.Organizer(s);
+            } catch (URISyntaxException ex) {
+                throw new RuntimeException(s, ex);
+            }
+            vevent.getProperties().add(d);
+        }
+    }        
+    
     public class DescriptionMapper extends Mapper {
 
         @Override

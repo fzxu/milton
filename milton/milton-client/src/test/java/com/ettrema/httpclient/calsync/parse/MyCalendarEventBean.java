@@ -21,6 +21,8 @@ import com.ettrema.httpclient.annotation.Etag;
 import com.ettrema.httpclient.calsync.parse.annotation.Description;
 import com.ettrema.httpclient.calsync.parse.annotation.EndDate;
 import com.ettrema.httpclient.annotation.Name;
+import com.ettrema.httpclient.calsync.parse.annotation.Location;
+import com.ettrema.httpclient.calsync.parse.annotation.Organizer;
 import com.ettrema.httpclient.calsync.parse.annotation.StartDate;
 import com.ettrema.httpclient.calsync.parse.annotation.Summary;
 import com.ettrema.httpclient.calsync.parse.annotation.Timezone;
@@ -40,6 +42,8 @@ public class MyCalendarEventBean {
     private String timezone;    
     private String summary;    
     private String description;    
+    private String location;
+    private String organizer;
 
     @Uid
     public String getUid() {
@@ -111,6 +115,24 @@ public class MyCalendarEventBean {
 
     public void setTimezone(String timezone) {
         this.timezone = timezone;
+    }
+
+    @Location
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    @Organizer
+    public String getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
     }
     
     

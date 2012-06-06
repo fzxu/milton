@@ -108,6 +108,8 @@ public class ParserTest extends TestCase {
                 + "DTEND:20120606T010000\n"
                 + "SUMMARY:aSummary\n"
                 + "DESCRIPTION:aDescription\n"
+                + "LOCATION:aLocation\n"
+                + "ORGANIZER:anOrganizer\n"
                 + "UID:XXX\n"
                 + "TZID:Europe/London\n"
                 + "END:VEVENT\n"
@@ -121,9 +123,12 @@ public class ParserTest extends TestCase {
         assertEquals("XXX", bean.getUid());
         assertEquals("aSummary", bean.getSummary());
         assertEquals("aDescription", bean.getDescription());
+        assertEquals("aLocation", bean.getLocation());
+        assertEquals("anOrganizer", bean.getOrganizer());
         assertNotNull(bean.getStartDate());
         assertNotNull(bean.getEndDate());
         assertEquals("20120606T235959", bean.getStartDate().toString());
+        
 //        assertEquals(st, bean.getStartDate());
 //        assertEquals(end, bean.getEndDate());
     }
@@ -133,6 +138,8 @@ public class ParserTest extends TestCase {
         bean.setUid("xxx");
         bean.setDescription("aDescription");
         bean.setSummary("aSummary");
+        bean.setLocation("The moon");
+        bean.setOrganizer("anOrganizer");
         Date now= new Date();
         bean.setStartDate(now );
         bean.setEndDate(now);
@@ -146,6 +153,8 @@ public class ParserTest extends TestCase {
         assertTrue(text.contains("aDescription"));
         assertTrue(text.contains("aSummary"));
         assertTrue(text.contains("GMT"));
+        assertTrue(text.contains("The moon"));
+        assertTrue(text.contains("anOrganizer"));
     }
 
 }
