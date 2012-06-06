@@ -19,8 +19,8 @@ package com.ettrema.httpclient.calsync.store;
 
 import com.ettrema.httpclient.annotation.Etag;
 import com.ettrema.httpclient.annotation.Name;
-import com.ettrema.httpclient.calsync.parse.annotation.GivenName;
-import com.ettrema.httpclient.calsync.parse.annotation.LastName;
+import com.ettrema.httpclient.calsync.parse.annotation.Description;
+import com.ettrema.httpclient.calsync.parse.annotation.EndDate;
 import com.ettrema.httpclient.calsync.parse.annotation.Uid;
 import java.util.*;
 
@@ -146,7 +146,7 @@ public class MemoryCalendarEventFactory implements CalendarEventFactory {
             this.etag = etag;
         }
 
-        @GivenName
+        @Description
         public String getFirstName() {
             return firstName;
         }
@@ -155,7 +155,7 @@ public class MemoryCalendarEventFactory implements CalendarEventFactory {
             this.firstName = firstName;
         }
 
-        @LastName
+        @EndDate
         public String getLastName() {
             return lastName;
         }

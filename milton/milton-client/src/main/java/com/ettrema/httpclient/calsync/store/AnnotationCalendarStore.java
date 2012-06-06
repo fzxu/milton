@@ -22,7 +22,7 @@ import com.ettrema.httpclient.annotation.ModifiedDate;
 import com.ettrema.httpclient.annotation.Name;
 import com.ettrema.httpclient.calsync.CalSyncEvent;
 import com.ettrema.httpclient.calsync.CalendarStore;
-import com.ettrema.httpclient.calsync.parse.BeanPropertyMapper;
+import com.ettrema.httpclient.calsync.parse.CalDavBeanPropertyMapper;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,17 +33,17 @@ import java.util.List;
  */
 public class AnnotationCalendarStore implements CalendarStore {
 
-    private final BeanPropertyMapper beanMapper;
+    private final CalDavBeanPropertyMapper beanMapper;
     private final CalendarEventFactory calendarEventFactory;
     private String id = "annotationStore";
     private boolean readonly;
 
-    public AnnotationCalendarStore(BeanPropertyMapper beanMapper, CalendarEventFactory calendarEventFactory) {
+    public AnnotationCalendarStore(CalDavBeanPropertyMapper beanMapper, CalendarEventFactory calendarEventFactory) {
         this.beanMapper = beanMapper;
         this.calendarEventFactory = calendarEventFactory;
     }
 
-    public AnnotationCalendarStore(String id, BeanPropertyMapper beanMapper, CalendarEventFactory calendarEventFactory) {
+    public AnnotationCalendarStore(String id, CalDavBeanPropertyMapper beanMapper, CalendarEventFactory calendarEventFactory) {
         this.id = id;
         this.beanMapper = beanMapper;
         this.calendarEventFactory = calendarEventFactory;

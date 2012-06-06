@@ -17,8 +17,7 @@
  */
 package com.ettrema.httpclient.calsync.parse;
 
-import info.ineighborhood.cardme.vcard.types.BeginType;
-import info.ineighborhood.cardme.vcard.types.EndType;
+import com.ettrema.httpclient.sync.PropertyAccessor;
 import java.lang.reflect.Method;
 import junit.framework.TestCase;
 
@@ -37,18 +36,18 @@ public class TypeConverterTest extends TestCase {
     
         
     public void test_GetString() throws Exception{
-        MyBean bean = new MyBean();
-        bean.setLastName("XXX");
-        Method readMethod = bean.getClass().getMethod("getLastName");
+        MyCalendarEventBean bean = new MyCalendarEventBean();
+        bean.setSummary("XXX");
+        Method readMethod = bean.getClass().getMethod("getSummar");
         String v = typeConverter.get(bean, readMethod, String.class);
         assertEquals("XXX", v);
     }
     
     public void test_SetString() throws Exception{
-        MyBean bean = new MyBean();
-        bean.setLastName("XXX");
-        Method writeMethod = bean.getClass().getMethod("setLastName", String.class);
+        MyCalendarEventBean bean = new MyCalendarEventBean();
+        bean.setSummary("XXX");
+        Method writeMethod = bean.getClass().getMethod("setSummary", String.class);
         typeConverter.set(bean, writeMethod, "YYY");
-        assertEquals("YYY", bean.getLastName());
+        assertEquals("YYY", bean.getSummary());
     }    
 }

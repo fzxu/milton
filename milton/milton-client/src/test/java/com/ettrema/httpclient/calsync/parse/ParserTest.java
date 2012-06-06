@@ -17,62 +17,135 @@
  */
 package com.ettrema.httpclient.calsync.parse;
 
-import info.ineighborhood.cardme.io.VCardWriter;
-import info.ineighborhood.cardme.vcard.VCard;
-import info.ineighborhood.cardme.vcard.VCardImpl;
-import info.ineighborhood.cardme.vcard.types.*;
+import com.ettrema.httpclient.sync.PropertyAccessor;
+import java.text.ParseException;
 import junit.framework.TestCase;
+import net.fortuna.ical4j.model.*;
 
 /**
  *
  * @author brad
  */
-public class ParserTest extends TestCase{
+public class ParserTest extends TestCase {
 
-    BeanPropertyMapper parser;
-    
+    CalDavBeanPropertyMapper parser;
+
     @Override
     protected void setUp() throws Exception {
-        parser = new BeanPropertyMapper(new PropertyAccessor());
+        parser = new CalDavBeanPropertyMapper(new PropertyAccessor());
     }
-    
-    
-    
-    public void testParse() {
-        MyBean bean = new MyBean();
-        VCard card = new VCardImpl();
-        card.setBegin(new BeginType());        
-        
-        card.setUID(new UIDType("xxx"));
-        card.setName(new NameType("smith", "joe"));
-        String formattedName = buildFormattedName(bean);
-        card.setFormattedName(new FormattedNameType(formattedName));
-        card.setEnd(new EndType());
-        VCardWriter writer = new VCardWriter();
-        writer.setVCard(card);
-        String text = writer.buildVCardString();
-        
-        parser.toBean(bean, text);
-        
-        assertEquals("xxx", bean.getUid());
-        assertEquals("smith", bean.getLastName());
-        assertEquals("joe", bean.getFirstName());
+
+    public void testParse() throws Exception {
+        String ical = "BEGIN:VCALENDAR\n"
+                + "PRODID:-//milton.io//iCal4j 1.0//EN\n"
+                + "VERSION:2.0\n"
+                + "BEGIN:VTIMEZONE\n"
+                + "TZID:Europe/London\n"
+                + "TZURL:http://tzurl.org/zoneinfo/Europe/London\n"
+                + "X-LIC-LOCATION:Europe/London\n"
+                + "BEGIN:DAYLIGHT\n"
+                + "TZOFFSETFROM:+0000\n"
+                + "TZOFFSETTO:+0100\n"
+                + "TZNAME:BST\n"
+                + "DTSTART:19810329T010000\n"
+                + "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n"
+                + "END:DAYLIGHT\n"
+                + "BEGIN:STANDARD\n"
+                + "TZOFFSETFROM:+0100\n"
+                + "TZOFFSETTO:+0000\n"
+                + "TZNAME:GMT\n"
+                + "DTSTART:19961027T020000\n"
+                + "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n"
+                + "END:STANDARD\n"
+                + "BEGIN:STANDARD\n"
+                + "TZOFFSETFROM:-000115\n"
+                + "TZOFFSETTO:+0000\n"
+                + "TZNAME:GMT\n"
+                + "DTSTART:18471201T000000\n"
+                + "END:STANDARD\n"
+                + "BEGIN:DAYLIGHT\n"
+                + "TZOFFSETFROM:+0000\n"
+                + "TZOFFSETTO:+0100\n"
+                + "TZNAME:BST\n"
+                + "DTSTART:19160521T023000\n"
+                + "END:DAYLIGHT\n"
+                + "BEGIN:STANDARD\n"
+                + "TZOFFSETFROM:+0100\n"
+                + "TZOFFSETTO:+0000\n"
+                + "TZNAME:GMT\n"
+                + "DTSTART:19161001T033000\n"
+                + "END:STANDARD\n"
+                + "BEGIN:DAYLIGHT\n"
+                + "TZOFFSETFROM:+0100\n"
+                + "TZOFFSETTO:+0200\n"
+                + "TZNAME:BDST\n"
+                + "DTSTART:19410504T030000\n"
+                + "END:DAYLIGHT\n"
+                + "BEGIN:DAYLIGHT\n"
+                + "TZOFFSETFROM:+0200\n"
+                + "TZOFFSETTO:+0100\n"
+                + "TZNAME:BST\n"
+                + "DTSTART:19410810T040000\n"
+                + "END:DAYLIGHT\n"
+                + "BEGIN:STANDARD\n"
+                + "TZOFFSETFROM:+0100\n"
+                + "TZOFFSETTO:+0100\n"
+                + "TZNAME:BST\n"
+                + "DTSTART:19681027T000000\n"
+                + "RDATE:\n"
+                + "END:STANDARD\n"
+                + "BEGIN:STANDARD\n"
+                + "TZOFFSETFROM:+0000\n"
+                + "TZOFFSETTO:+0000\n"
+                + "TZNAME:GMT\n"
+                + "DTSTART:19960101T000000\n"
+                + "RDATE:\n"
+                + "END:STANDARD\n"
+                + "END:VTIMEZONE\n"
+                + "BEGIN:VEVENT\n"
+                + "DTSTAMP:20120606T213352Z\n"
+                + "DTSTART;TZID=Europe/London:20120606T235959\n"
+                + "DTEND:20120606T010000\n"
+                + "SUMMARY:aSummary\n"
+                + "DESCRIPTION:aDescription\n"
+                + "UID:XXX\n"
+                + "TZID:Europe/London\n"
+                + "END:VEVENT\n"
+                + "END:VCALENDAR";
+
+        MyCalendarEventBean bean = new MyCalendarEventBean();
+
+
+        parser.toBean(bean, ical);
+
+        assertEquals("XXX", bean.getUid());
+        assertEquals("aSummary", bean.getSummary());
+        assertEquals("aDescription", bean.getDescription());
+        assertNotNull(bean.getStartDate());
+        assertNotNull(bean.getEndDate());
+        assertEquals("20120606T235959", bean.getStartDate().toString());
+//        assertEquals(st, bean.getStartDate());
+//        assertEquals(end, bean.getEndDate());
     }
-    
+
     public void testFormat() {
-        MyBean bean = new MyBean();
+        MyCalendarEventBean bean = new MyCalendarEventBean();
         bean.setUid("xxx");
-        bean.setFirstName("joe");
-        bean.setLastName("smith");
+        bean.setDescription("aDescription");
+        bean.setSummary("aSummary");
+        Date now= new Date();
+        bean.setStartDate(now );
+        bean.setEndDate(now);
+        bean.setTimezone("GMT");
         
         String text = parser.toVCard(bean);
-        
+        System.out.println("---");
+        System.out.println(text);
+        System.out.println("---");
         assertTrue(text.contains("xxx"));
-        assertTrue(text.contains("joe"));
-        assertTrue(text.contains("smith"));
-    }    
-
-    private String buildFormattedName(MyBean bean) {
-        return bean.getFirstName() + " " + bean.getLastName();
+        assertTrue(text.contains("aDescription"));
+        assertTrue(text.contains("aSummary"));
+        assertTrue(text.contains("GMT"));
     }
+
 }

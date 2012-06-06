@@ -20,8 +20,8 @@ package com.ettrema.httpclient.calsync;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.ettrema.httpclient.calsync.conflict.PolicyConflictManager;
-import com.ettrema.httpclient.calsync.parse.BeanPropertyMapper;
-import com.ettrema.httpclient.calsync.parse.PropertyAccessor;
+import com.ettrema.httpclient.calsync.parse.CalDavBeanPropertyMapper;
+import com.ettrema.httpclient.sync.PropertyAccessor;
 import com.ettrema.httpclient.calsync.store.AnnotationCalendarStore;
 import com.ettrema.httpclient.calsync.store.MemoryCalSyncStatusStore;
 import com.ettrema.httpclient.calsync.store.MemoryCalendarEventFactory;
@@ -37,7 +37,7 @@ import junit.framework.TestCase;
 public class AnnotatedStoreTest extends TestCase {
 
     PropertyAccessor propertyAccessor = new PropertyAccessor();
-    BeanPropertyMapper beanMapper = new BeanPropertyMapper(propertyAccessor);
+    CalDavBeanPropertyMapper beanMapper = new CalDavBeanPropertyMapper(propertyAccessor);
     MemoryCalendarEventFactory calendarEventFactory = new MemoryCalendarEventFactory();
     
     AnnotationCalendarStore localStore;
