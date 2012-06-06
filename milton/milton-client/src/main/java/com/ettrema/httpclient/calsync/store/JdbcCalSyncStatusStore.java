@@ -98,8 +98,9 @@ public class JdbcCalSyncStatusStore implements CalSyncStatusStore {
 
     
     @Override
-    public void setLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName, String etag) {
-        setStatus(local.getId(), remote.getId(), "e-" + resourceName, etag);
+    public void setLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName, LastSync etags) {
+        setStatus(local.getId(), remote.getId(), "l-" + resourceName, etags.getLocalEtag());
+        setStatus(local.getId(), remote.getId(), "r-" + resourceName, etags.getRemoteEtag());
     }
 
     @Override
@@ -108,8 +109,10 @@ public class JdbcCalSyncStatusStore implements CalSyncStatusStore {
     }
 
     @Override
-    public String getLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName) {
-        return getStatus(local.getId(), remote.getId(), "e-" + resourceName);
+    public LastSync getLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName) {
+        String localEtag = getStatus(local.getId(), remote.getId(), "l-" + resourceName);
+        String remoteEtag = getStatus(local.getId(), remote.getId(), "r-" + resourceName);
+        return new LastSync(localEtag, remoteEtag);
     }
 
     @Override

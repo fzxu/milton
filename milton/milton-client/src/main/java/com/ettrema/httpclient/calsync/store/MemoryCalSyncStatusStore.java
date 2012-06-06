@@ -15,22 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/*
- * Copyright 2012 McEvoy Software Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.ettrema.httpclient.calsync.store;
 
 import com.ettrema.httpclient.calsync.CalSyncStatusStore;
@@ -48,7 +32,7 @@ public class MemoryCalSyncStatusStore implements CalSyncStatusStore{
     private List<CTagStatus> ctags = new ArrayList<CTagStatus>();
     
     @Override
-    public void setLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName, String etag) {
+    public void setLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName, LastSync etag) {
         ETagStatus s = getETagStatus(local, remote, resourceName);
         if( s == null ) {
             s = new ETagStatus();
@@ -58,10 +42,20 @@ public class MemoryCalSyncStatusStore implements CalSyncStatusStore{
             etags.add(s);
         }
         if( etag != null ) {
-            s.etag = etag;
+            s.remoteEtag = etag.getRemoteEtag();
+            s.localEtag = etag.getLocalEtag();
         } else {
             etags.remove(s);
         }
+    }
+
+    @Override
+    public LastSync getLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName) {
+        ETagStatus s = getETagStatus(local, remote, resourceName);
+        if( s != null ) {
+            return new LastSync(s.localEtag, s.remoteEtag);
+        }
+        return null;
     }
 
     @Override
@@ -72,15 +66,7 @@ public class MemoryCalSyncStatusStore implements CalSyncStatusStore{
         }
         return null;
     }
-
-    @Override
-    public String getLastSyncedEtag(CalendarStore local, CalendarStore remote, String resourceName) {
-        ETagStatus s = getETagStatus(local, remote, resourceName);
-        if( s != null ) {
-            return s.etag;
-        }
-        return null;
-    }
+    
     
     private CTagStatus getCTagStatus(CalendarStore local, CalendarStore remote) {
         for( CTagStatus c : ctags ) {
@@ -116,7 +102,8 @@ public class MemoryCalSyncStatusStore implements CalSyncStatusStore{
         CalendarStore local;
         CalendarStore remote;
         String resourceName;
-        String etag;
+        String remoteEtag;
+        String localEtag;
     }
     
     private class CTagStatus {

@@ -44,10 +44,10 @@ public interface DeltaListener {
      * 
      * @param remote - the remote calendar event
      * @param local - the local CalendarStore
-     * @return true if the events were syncronised
+     * @return null if no updates were made, otherwise the locally modified etag
      * @throws IOException 
      */
-    boolean onRemoteChange(CalSyncEvent remote, CalendarStore remoteStore, CalSyncEvent localEvent, CalendarStore localStore);
+    String onRemoteChange(CalSyncEvent remote, CalendarStore remoteStore, CalSyncEvent localEvent, CalendarStore localStore);
     
     /**
      * Called when an event has been deleted from the server, but is still locally present

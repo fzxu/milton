@@ -35,6 +35,7 @@ package com.ettrema.httpclient.calsync;
 
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
+import com.ettrema.httpclient.calsync.CalSyncStatusStore.LastSync;
 import com.ettrema.httpclient.calsync.ConflictManager.ConflictAction;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,13 +80,15 @@ public class CalendarDeltaGenerator {
 
         for (CalSyncEvent remoteRes : remoteChildren) {
             CalSyncEvent localRes = localMap.get(remoteRes.getName());
+            LastSync lastSynced = statusStore.getLastSyncedEtag(local, remote, remoteRes.getName());
             if (localRes == null) {
-                doMissingLocal(remoteRes);
-            } else {
-                if (localRes.getEtag() != null && localRes.getEtag().equals(remoteRes.getEtag())) {
-                    statusStore.setLastSyncedEtag(local, remote, remoteRes.getName(), remoteRes.getEtag());
+                doMissingLocal(remoteRes, lastSynced);
+            } else {                
+                if (lastSynced == null) {
+                    // event both local and remote, can't tell which is latest
+                    onConflict(remoteRes, localRes);
                 } else {
-                    doDifferentETags(remoteRes, localRes);
+                    checkEtags(lastSynced, localRes, remoteRes);
                 }
             }
         }
@@ -94,25 +97,28 @@ public class CalendarDeltaGenerator {
         for (CalSyncEvent localRes : localChildren) {
             CalSyncEvent remoteRes = remoteMap.get(localRes.getName());
             if (remoteRes == null) {
-                doMissingRemote(localRes);
+                LastSync lastSynced = statusStore.getLastSyncedEtag(local, remote, localRes.getName());
+                doMissingRemote(localRes, lastSynced);
             }
         }
-        
+
         statusStore.setLastSyncedCtag(local, remote, remoteCtag);
     }
 
-    private void doMissingLocal(CalSyncEvent remoteRes) {
+    private void doMissingLocal(CalSyncEvent remoteRes, LastSync lastSynced) {
         // There is a resource in the remote store, but no corresponding local resource
         // Need to determine if it has been locally deleted or remotely created
-        String lastSyncedEtag = statusStore.getLastSyncedEtag(local, remote, remoteRes.getName());
-        if (lastSyncedEtag == null) {
+
+        if (lastSynced == null) {
             // we've never seen it before, so it must be remotely new
-            if( deltaListener.onRemoteChange(remoteRes, remote, null, local) ) {
-                statusStore.setLastSyncedEtag(local, remote, remoteRes.getName(), remoteRes.getEtag());
+            String newLocalEtag = deltaListener.onRemoteChange(remoteRes, remote, null, local);
+            if (newLocalEtag != null) {
+                LastSync etags = new LastSync(newLocalEtag, remoteRes.getEtag());
+                statusStore.setLastSyncedEtag(local, remote, remoteRes.getName(), etags);
             }
         } else {
             // we have previously synced this item, it no longer exists, so must have been deleted
-            if( deltaListener.onLocalDeletion(remoteRes, remote) ) {
+            if (deltaListener.onLocalDeletion(remoteRes, remote)) {
                 statusStore.setLastSyncedEtag(local, remote, remoteRes.getName(), null);
             }
         }
@@ -124,46 +130,38 @@ public class CalendarDeltaGenerator {
      *
      * @param localRes
      */
-    private void doMissingRemote(CalSyncEvent localRes) {
-        String lastSyncedEtag = statusStore.getLastSyncedEtag(local, remote, localRes.getName());
-        if (lastSyncedEtag == null) {
+    private void doMissingRemote(CalSyncEvent localRes, LastSync lastSynced) {
+        if (lastSynced == null) {
             // never before synced, so is locally new
             String newRemoteEtag = deltaListener.onLocalChange(localRes, local, null, remote);
-            if( newRemoteEtag != null ) {
-                statusStore.setLastSyncedEtag(local, remote, localRes.getName(), newRemoteEtag);
+            if (newRemoteEtag != null) {
+                statusStore.setLastSyncedEtag(local, remote, localRes.getName(), new LastSync(localRes.getEtag(), newRemoteEtag));
             }
         } else {
             // has been synced before, so was on server and not now = rmotely deleted
-            if( deltaListener.onRemoteDelete(localRes, local) ) {
+            if (deltaListener.onRemoteDelete(localRes, local)) {
                 statusStore.setLastSyncedEtag(local, remote, localRes.getName(), null);
             }
         }
     }
 
-    /**
-     * so we know the events differ, but which is most up to date? we check the
-     * last synced etag for this local and remote store if current remote etag
-     * is different to last synced etag, then remote is modified if current
-     * local etag is different then local is modified it both modified then its
-     * a CONFLICT
-     */
-    private void doDifferentETags(CalSyncEvent remoteRes, CalSyncEvent localRes) {
-        String lastSyncedEtag = statusStore.getLastSyncedEtag(local, remote, remoteRes.getName());
-        if (lastSyncedEtag == null) {
+    private void checkEtags(LastSync lastSynced, CalSyncEvent localRes, CalSyncEvent remoteRes) {
+        boolean localChange = !lastSynced.getLocalEtag().equals(localRes.getEtag());
+        boolean remoteChange = !lastSynced.getRemoteEtag().equals(remoteRes.getEtag());
+        if (localChange && remoteChange) {
             onConflict(remoteRes, localRes);
-        } else {
-            if (!lastSyncedEtag.equals(remoteRes.getEtag()) && !lastSyncedEtag.equals(localRes.getEtag())) {
-                onConflict(remoteRes, localRes);
-            } else if (!lastSyncedEtag.equals(remoteRes.getEtag())) {
-                if( deltaListener.onRemoteChange(remoteRes, remote, localRes, local) ) {
-                    statusStore.setLastSyncedEtag(local, remote, localRes.getName(), remoteRes.getEtag());
-                }
-            } else if (!lastSyncedEtag.equals(localRes.getEtag())) {
-                String newRemoteEtag = deltaListener.onLocalChange(localRes, local, remoteRes, remote);
-                if( newRemoteEtag != null ) {
-                    statusStore.setLastSyncedEtag(local, remote, localRes.getName(), remoteRes.getEtag());
-                }
+        } else if (localChange) {
+            String newRemoteEtag = deltaListener.onLocalChange(localRes, local, remoteRes, remote);
+            if (newRemoteEtag != null) {
+                statusStore.setLastSyncedEtag(local, remote, localRes.getName(), new LastSync(localRes.getEtag(), newRemoteEtag));
             }
+        } else if( remoteChange) {
+            String newLocalEtag = deltaListener.onRemoteChange(remoteRes, remote, localRes, local);
+            if (newLocalEtag != null) {
+                statusStore.setLastSyncedEtag(local, remote, localRes.getName(), new LastSync(newLocalEtag, remoteRes.getEtag()));
+            }
+        } else {
+            // no change
         }
     }
 
@@ -178,13 +176,14 @@ public class CalendarDeltaGenerator {
                 return true;
             case USE_LOCAL:
                 String newRemoteEtag = deltaListener.onLocalChange(localRes, local, remoteRes, remote);
-                if( newRemoteEtag != null ) {
-                    statusStore.setLastSyncedEtag(local, remote, localRes.getName(), remoteRes.getEtag());
+                if (newRemoteEtag != null) {
+                    statusStore.setLastSyncedEtag(local, remote, localRes.getName(), new LastSync(localRes.getEtag(), newRemoteEtag));
                 }
                 return true;
             case USE_REMOTE:
-                if( deltaListener.onRemoteChange(remoteRes, remote, localRes, local) ) {
-                    statusStore.setLastSyncedEtag(local, remote, remoteRes.getName(), remoteRes.getEtag());
+                String newLocalEtag = deltaListener.onRemoteChange(remoteRes, remote, localRes, local);
+                if (newLocalEtag != null) {
+                    statusStore.setLastSyncedEtag(local, remote, remoteRes.getName(), new LastSync(newLocalEtag, remoteRes.getEtag()));
                 }
         }
         return false;
