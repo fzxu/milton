@@ -18,7 +18,7 @@
 */
 package com.ettrema.httpclient.calsync.parse;
 
-import com.ettrema.httpclient.sync.PropertyAccessor;
+import com.ettrema.httpclient.parse.PropertyAccessor;
 import java.lang.reflect.Method;
 import junit.framework.TestCase;
 

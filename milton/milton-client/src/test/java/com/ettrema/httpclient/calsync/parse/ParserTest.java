@@ -18,7 +18,7 @@
 */
 package com.ettrema.httpclient.calsync.parse;
 
-import com.ettrema.httpclient.sync.PropertyAccessor;
+import com.ettrema.httpclient.parse.PropertyAccessor;
 import java.text.ParseException;
 import junit.framework.TestCase;
 import net.fortuna.ical4j.model.*;

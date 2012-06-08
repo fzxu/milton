@@ -19,7 +19,7 @@
 package com.ettrema.httpclient.calsync.parse;
 
 import com.ettrema.httpclient.calsync.parse.annotation.*;
-import com.ettrema.httpclient.sync.PropertyAccessor;
+import com.ettrema.httpclient.parse.PropertyAccessor;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -18,7 +18,7 @@
 */
 package com.ettrema.httpclient.cardsync.parse;
 
-import com.ettrema.httpclient.sync.PropertyAccessor;
+import com.ettrema.httpclient.parse.PropertyAccessor;
 import com.ettrema.httpclient.calsync.parse.*;
 import com.ettrema.httpclient.calsync.parse.annotation.Description;
 import com.ettrema.httpclient.calsync.parse.annotation.EndDate;

@@ -16,7 +16,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package com.ettrema.httpclient.sync;
+package com.ettrema.httpclient.parse;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
