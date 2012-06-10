@@ -190,14 +190,13 @@ public class PutHandler implements Handler {
 					log.warn("getName on the created resource does not match the name requested by the client! requested: " + newName + " - created: " + newlyCreated.getName());
 				}
 				manager.getEventManager().fireEvent(new PutEvent(newlyCreated));
+				manager.getResponseHandler().respondCreated(newlyCreated, response, request);
 			} else {
-				log.warn("createNew returned a null resource");
+				throw new RuntimeException("createNew method on: " + folder.getClass() + " returned a null resource. Must return a reference to the newly created or modified resource");
 			}			
 		} catch (IOException ex) {
-			log.warn("IOException reading input stream. Probably interrupted upload: " + ex.getMessage());
-			return;
-		}
-		manager.getResponseHandler().respondCreated(folder, response, request);
+			throw new RuntimeException("IOException reading input stream. Probably interrupted upload", ex);
+		}		
 	}
 
 	private CollectionResource findOrCreateFolders(HttpManager manager, String host, Path path) throws NotAuthorizedException, ConflictException, BadRequestException {

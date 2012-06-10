@@ -19,12 +19,12 @@
 
 package com.ettrema.httpclient;
 
+import com.bradmcevoy.common.Path;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.exceptions.NotFoundException;
 import java.io.*;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +47,26 @@ public class Utils {
 
     private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
+    /**
+     * Convert the path to a url encoded string, by url encoding each path of the
+     * path. Will not be suffixed with a slash
+     * 
+     * @param path
+     * @return 
+     */
+    public static String buildEncodedUrl(Path path) {
+        String url = "";
+        String[] arr = path.getParts();
+        for (int i = 0; i < arr.length; i++) {
+            String s = arr[i];
+            if (i > 0) {
+                url += "/";
+            }
+            url += com.bradmcevoy.http.Utils.percentEncode(s);
+        }
+        return url;
+    }    
+    
     /**
      * Execute the given request, populate any returned content to the outputstream,
      * and return the status code
@@ -78,7 +98,8 @@ public class Utils {
             }
         }
         Map<String,String> mapOfHeaders = new HashMap<String, String>();
-        for( Header h : resp.getAllHeaders( )) {
+        Header[] respHeaders = resp.getAllHeaders();
+        for( Header h : respHeaders) {
             mapOfHeaders.put(h.getName(), h.getValue()); // TODO: should concatenate multi-valued headers
         }
         HttpResult result = new HttpResult(resp.getStatusLine().getStatusCode(), mapOfHeaders);

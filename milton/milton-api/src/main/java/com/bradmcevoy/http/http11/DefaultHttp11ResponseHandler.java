@@ -34,12 +34,26 @@ import org.slf4j.LoggerFactory;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.exceptions.NotFoundException;
 import com.ettrema.sso.ExternalIdentityProvider;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  *
  */
 public class DefaultHttp11ResponseHandler implements Http11ResponseHandler, Bufferable {
 
+	private static String miltonVerson;	
+	{
+		Properties props = new Properties();
+		try {
+			props.load(DefaultHttp11ResponseHandler.class.getResourceAsStream("/milton.properties"));
+		} catch (IOException ex) {
+			log.warn("Failed lot load milton properties file", ex);
+		}
+		miltonVerson = props.getProperty("milton.version");
+	}
+	
+	
 	public enum BUFFERING {
 
 		always,
@@ -160,7 +174,7 @@ public class DefaultHttp11ResponseHandler implements Http11ResponseHandler, Buff
 	@Override
 	public void respondCreated(Resource resource, Response response, Request request) {
 //        log.debug( "respondCreated" );
-		response.setStatus(Response.Status.SC_CREATED);
+		setRespondCommonHeaders(response, resource, Status.SC_CREATED, request.getAuthorization());
 	}
 
 	@Override
@@ -168,7 +182,7 @@ public class DefaultHttp11ResponseHandler implements Http11ResponseHandler, Buff
 //        log.debug( "respondNoContent" );
 		//response.setStatus(Response.Status.SC_OK);
 		// see comments in http://www.ettrema.com:8080/browse/MIL-87
-		response.setStatus(Response.Status.SC_NO_CONTENT);
+		setRespondCommonHeaders(response, resource, Status.SC_NO_CONTENT, request.getAuthorization());
 	}
 
 	@Override
@@ -275,15 +289,21 @@ public class DefaultHttp11ResponseHandler implements Http11ResponseHandler, Buff
 	}
 
 	protected void setRespondContentCommonHeaders(Response response, Resource resource, Response.Status status, Auth auth) {
+		setRespondCommonHeaders(response, resource, status, auth);
+		setModifiedDate(response, resource, auth);
+	}
+
+	protected void setRespondCommonHeaders(Response response, Resource resource, Response.Status status, Auth auth) {
 		response.setStatus(status);
+		response.setNonStandardHeader("Server", "milton.io-" + miltonVerson);
 		response.setDateHeader(new Date());
 		String etag = eTagGenerator.generateEtag(resource);
 		if (etag != null) {
 			response.setEtag(etag);
 		}
-		setModifiedDate(response, resource, auth);
 	}
-
+	
+	
 	/**
 	 * The modified date response header is used by the client for content
 	 * caching. It seems obvious that if we have a modified date on the resource

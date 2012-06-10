@@ -63,7 +63,7 @@ public interface Response {
         LAST_MODIFIED( "Last-Modified" ),
         LOCK_TOKEN( "Lock-Token" ),
         EXPIRES( "Expires" ),
-        ETAG( "Etag" ),
+        ETAG( "ETag" ),
         VARY( "Vary" ),
         CONTENT_RANGE( "Content-Range" );
         public String code;

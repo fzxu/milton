@@ -27,6 +27,7 @@ import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.http11.auth.DigestGenerator;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * BM: added reportable so that all these resource classes work with REPORT
@@ -36,12 +37,14 @@ import java.util.Date;
 public class AbstractResource implements Resource, ReportableResource {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractResource.class);
+    protected UUID id;
     protected String name;
     protected Date modDate;
     protected Date createdDate;
     protected TFolderResource parent;
 
     public AbstractResource(TFolderResource parent, String name) {
+        id = UUID.randomUUID();
         this.parent = parent;
         this.name = name;
         modDate = new Date();
@@ -99,7 +102,7 @@ public class AbstractResource implements Resource, ReportableResource {
 
 	@Override
     public String getUniqueId() {
-        return this.hashCode() + "";
+        return this.id.toString();
     }
 
 	@Override

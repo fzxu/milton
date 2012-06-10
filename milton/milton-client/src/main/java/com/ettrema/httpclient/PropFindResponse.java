@@ -1,26 +1,25 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements.  See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership.  The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License.  You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.ettrema.httpclient;
 
 import com.bradmcevoy.http.DateUtils;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import javax.xml.namespace.QName;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -34,15 +33,13 @@ import org.slf4j.LoggerFactory;
 public class PropFindResponse {
 
     private static final Logger log = LoggerFactory.getLogger(PropFindResponse.class);
-    
     private final String name;
     private final String href;
     private final boolean collection;
-    private Map<QName, Object> properties;
+    private Map<QName, Object> properties = new HashMap<QName, Object>();
 
     public PropFindResponse(Date serverDate, Element elResponse) {
         href = RespUtils.asString(elResponse, "href").trim();
-        Element el = elResponse.getChild("propstat", RespUtils.NS_DAV).getChild("prop", RespUtils.NS_DAV);
         if (href.contains("/")) {
             String[] arr = href.split("[/]");
             if (arr.length > 0) {
@@ -53,14 +50,17 @@ public class PropFindResponse {
         } else {
             name = href;
         }
-        collection = RespUtils.hasChild(el, "collection");
-        for (Object oElProp : elResponse.getChildren()) {
+        List<Element> propElements = getFoundProps(elResponse);
+        Element colElement = null;
+        for (Object oElProp : propElements) {
             if (oElProp instanceof Element) {
                 Element elProp = (Element) oElProp;
                 String localName = elProp.getName();
                 Namespace ns = elProp.getNamespace();
                 QName qn = new QName(ns.getURI(), localName, ns.getPrefix());
-                if (localName.equals("lockdisovery")) {
+                if (localName.equals("resourcetype")) {
+                    colElement = elProp.getChild("collection", RespUtils.NS_DAV);  
+                } else if (localName.equals("lockdisovery")) {
                     Element elActiveLock = elProp.getChild("activelock", RespUtils.NS_DAV);
                     String token;
                     String owner;
@@ -105,6 +105,7 @@ public class PropFindResponse {
                 }
             }
         }
+        collection = (colElement != null);
     }
     // getters for common properties
 
@@ -177,6 +178,34 @@ public class PropFindResponse {
         return Long.parseLong(s);
     }
 
+    private List<Element> getFoundProps(Element elResponse) {
+        for (Object olPropStat : elResponse.getChildren()) {
+            if (olPropStat instanceof Element) {
+                Element propStat = (Element) olPropStat;
+                if (propStat.getName().equals("propstat")) {
+                    Element elStatus = propStat.getChild("status", RespUtils.NS_DAV);
+                    if (elStatus != null) {
+                        String st = elStatus.getText();
+                        if (st != null && st.contains("200")) {
+                            Element elProps = propStat.getChild("prop", RespUtils.NS_DAV);
+                            if (elProps != null) {
+                                List<Element> list = new ArrayList<Element>();
+                                for (Object oProp : elProps.getChildren()) {
+                                    if (oProp instanceof Element) {
+                                        Element elProp = (Element) oProp;
+                                        list.add(elProp);
+                                    }
+                                }
+                                return list;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return Collections.EMPTY_LIST;
+    }
+
 //        String dn = RespUtils.asString(el, "displayname");
 //        displayName = (dn == null) ? name : dn;
 //        createdDate = RespUtils.asString(el, "creationdate");
@@ -227,7 +256,5 @@ public class PropFindResponse {
         public String getToken() {
             return token;
         }
-
-        
     }
 }

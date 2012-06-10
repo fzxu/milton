@@ -1,21 +1,21 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements.  See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership.  The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License.  You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.ettrema.httpclient.calsync.parse;
 
 import com.ettrema.httpclient.calsync.parse.annotation.*;
@@ -79,9 +79,9 @@ public class CalDavBeanPropertyMapper {
             try {
                 cal4jCalendar = builder.build(fin);
             } catch (IOException ex) {
-                throw new RuntimeException(ex);
+                throw new RuntimeException(icalText, ex);
             } catch (ParserException ex) {
-                throw new RuntimeException(ex);
+                throw new RuntimeException(icalText, ex);
             }
             PropertyDescriptor[] pds = PropertyUtils.getPropertyDescriptors(bean);
             for (PropertyDescriptor pd : pds) {
@@ -227,8 +227,11 @@ public class CalDavBeanPropertyMapper {
             if (tzId != null && tzId.length() > 0) {
                 timezone = registry.getTimeZone(tzId); // Eg Pacific/Auckland
             }
-            VTimeZone tz = timezone.getVTimeZone();
-            cal.getComponents().add(tz);
+            // TODO: do we need to use a default time zone if none given?
+            if (timezone != null) {
+                VTimeZone tz = timezone.getVTimeZone();
+                cal.getComponents().add(tz);
+            }
         }
     }
 
@@ -248,8 +251,8 @@ public class CalDavBeanPropertyMapper {
             net.fortuna.ical4j.model.property.Location d = new net.fortuna.ical4j.model.property.Location(s);
             vevent.getProperties().add(d);
         }
-    }    
-    
+    }
+
     public class OrganizerMapper extends Mapper {
 
         @Override
@@ -262,6 +265,9 @@ public class CalDavBeanPropertyMapper {
         @Override
         void mapToCard(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
             String s = propertyAccessor.get(bean, pd.getReadMethod(), String.class);
+            if (s == null || s.trim().length() == 0) {
+                return;
+            }
             VEvent vevent = event(cal);
             net.fortuna.ical4j.model.property.Organizer d;
             try {
@@ -271,8 +277,8 @@ public class CalDavBeanPropertyMapper {
             }
             vevent.getProperties().add(d);
         }
-    }        
-    
+    }
+
     public class DescriptionMapper extends Mapper {
 
         @Override
@@ -285,6 +291,10 @@ public class CalDavBeanPropertyMapper {
         @Override
         void mapToCard(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
             String s = propertyAccessor.get(bean, pd.getReadMethod(), String.class);
+            if (s == null && s.trim().length() == 0) {
+                return;
+            }
+
             VEvent vevent = event(cal);
             net.fortuna.ical4j.model.property.Description d = new net.fortuna.ical4j.model.property.Description();
             d.setValue(s);
@@ -306,6 +316,10 @@ public class CalDavBeanPropertyMapper {
         void mapToCard(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
             VEvent vevent = event(cal);
             String s = propertyAccessor.get(bean, pd.getReadMethod(), String.class);
+            if (s == null && s.trim().length() == 0) {
+                return;
+            }
+
             net.fortuna.ical4j.model.property.Summary d = new net.fortuna.ical4j.model.property.Summary(s);
             vevent.getProperties().add(d);
         }
@@ -325,6 +339,10 @@ public class CalDavBeanPropertyMapper {
         void mapToCard(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
             VEvent vevent = event(cal);
             Date d = propertyAccessor.get(bean, pd.getReadMethod(), Date.class);
+            if (d == null) {
+                return;
+            }
+
             net.fortuna.ical4j.model.Date dt = new net.fortuna.ical4j.model.Date(d);
             net.fortuna.ical4j.model.property.DtEnd p = new net.fortuna.ical4j.model.property.DtEnd(dt);
             vevent.getProperties().add(p);
@@ -345,6 +363,10 @@ public class CalDavBeanPropertyMapper {
         void mapToCard(net.fortuna.ical4j.model.Calendar cal, Object bean, PropertyDescriptor pd) {
             VEvent vevent = event(cal);
             Date d = propertyAccessor.get(bean, pd.getReadMethod(), Date.class);
+            if (d == null) {
+                return;
+            }
+
             net.fortuna.ical4j.model.Date dt = new net.fortuna.ical4j.model.Date(d);
             net.fortuna.ical4j.model.property.DtStart p = new net.fortuna.ical4j.model.property.DtStart(dt);
             vevent.getProperties().add(p);

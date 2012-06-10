@@ -1,22 +1,21 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements.  See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership.  The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License.  You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
-
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.ettrema.httpclient;
 
 import com.bradmcevoy.common.Path;
@@ -83,15 +82,13 @@ import org.slf4j.LoggerFactory;
 public class Host extends Folder {
 
     public static List<QName> defaultFields = Arrays.asList(
-            RespUtils.davName("resourcetype"), 
-            RespUtils.davName("displayname"), 
+            RespUtils.davName("resourcetype"),
+            RespUtils.davName("displayname"),
             RespUtils.davName("getcontentlength"),
-            RespUtils.davName("creationdate"), 
+            RespUtils.davName("creationdate"),
             RespUtils.davName("getlastmodified"),
             RespUtils.davName("iscollection"),
-            RespUtils.davName("lockdiscovery")
-            );    
-
+            RespUtils.davName("lockdiscovery"));
     private static String LOCK_XML = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
             + "<D:lockinfo xmlns:D='DAV:'>"
             + "<D:lockscope><D:exclusive/></D:lockscope>"
@@ -112,7 +109,6 @@ public class Host extends Folder {
     private final TransferService transferService;
     private final FileSyncer fileSyncer;
     private final List<ConnectionListener> connectionListeners = new ArrayList<ConnectionListener>();
-    
     private boolean secure; // use HTTPS if true
 
     static {
@@ -139,7 +135,15 @@ public class Host extends Folder {
         if (server == null) {
             throw new IllegalArgumentException("host name cannot be null");
         }
-        this.rootPath = rootPath;
+        if (rootPath != null) {
+            String rp = rootPath;
+            if (rp.startsWith("/")) { // strip leading slash so can be concatenated
+                rp = rp.substring(1);
+            }
+            this.rootPath = rp;
+        } else {
+            this.rootPath = null;
+        }
         this.timeout = timeoutMillis;
         this.server = server;
         this.port = port;
@@ -437,8 +441,9 @@ public class Host extends Folder {
     }
 
     /**
-     * Deletes the item at the given path, relative to the root path of this host
-     * 
+     * Deletes the item at the given path, relative to the root path of this
+     * host
+     *
      * @param path - unencoded and relative to Host's rootPath
      * @return
      * @throws IOException
@@ -446,12 +451,10 @@ public class Host extends Folder {
      * @throws NotAuthorizedException
      * @throws ConflictException
      * @throws BadRequestException
-     * @throws NotFoundException 
+     * @throws NotFoundException
      */
     public synchronized int doDelete(Path path) throws IOException, com.ettrema.httpclient.HttpException, NotAuthorizedException, ConflictException, BadRequestException, NotFoundException {
-        Path root = Path.path(rootPath);
-        Path p = root.add(path);
-        String dest = buildEncodedUrl(p);
+        String dest = buildEncodedUrl(path);
         return doDelete(dest);
     }
 
@@ -495,34 +498,35 @@ public class Host extends Folder {
             notifyFinishRequest();
         }
     }
-    
-    public synchronized List<PropFindResponse> propFind(Path path, int depth, QName ... fields) throws IOException, com.ettrema.httpclient.HttpException, NotAuthorizedException, BadRequestException {
+
+    public synchronized List<PropFindResponse> propFind(Path path, int depth, QName... fields) throws IOException, com.ettrema.httpclient.HttpException, NotAuthorizedException, BadRequestException {
         List<QName> list = new ArrayList<QName>();
         list.addAll(Arrays.asList(fields));
         return propFind(path, depth, list);
     }
 
     /**
-     * 
-     * @param path - unencoded path, which will be evaluated relative to this Host's basePath
-     * @param depth - 1 is to find immediate children, 2 includes their children, etc
+     *
+     * @param path - unencoded path, which will be evaluated relative to this
+     * Host's basePath
+     * @param depth - 1 is to find immediate children, 2 includes their
+     * children, etc
      * @param fields - the list of fields to get, or null to use default fields
      * @return
      * @throws IOException
      * @throws com.ettrema.httpclient.HttpException
      * @throws NotAuthorizedException
-     * @throws BadRequestException 
+     * @throws BadRequestException
      */
     public synchronized List<PropFindResponse> propFind(Path path, int depth, List<QName> fields) throws IOException, com.ettrema.httpclient.HttpException, NotAuthorizedException, BadRequestException {
-        Path base = Path.path(rootPath);
-        Path p = base.add(path);
-        String url = buildEncodedUrl(p);
+        String url = buildEncodedUrl(path);
         return _doPropFind(url, depth, fields);
     }
 
     /**
      *
-     * @param url - the encoded absolute URL to query. This method does not apply basePath
+     * @param url - the encoded absolute URL to query. This method does not
+     * apply basePath
      * @param depth - depth to generate responses for. Zero means only the
      * specified url, 1 means it and its direct children, etc
      * @return
@@ -562,12 +566,12 @@ public class Host extends Folder {
                             Date serverDate = null;
                             if (sServerDate != null && sServerDate.length() > 0) {
                                 try {
-                                    serverDate = DateUtils.parseWebDavDate(sServerDate);
+                                    serverDate = DateUtils.parseDate(sServerDate);
                                 } catch (DateParseException ex) {
-                                    log.warn("Couldnt parse date header: " + sServerDate);
+                                    log.warn("Couldnt parse date header: " + sServerDate, ex);
                                 }
                             }
-                            
+
                             buildResponses(document, serverDate, responses, depth);
 
                         }
@@ -746,21 +750,19 @@ public class Host extends Folder {
     }
 
     /**
-     * GET the contents of the given path. The path is non-encoded, and it relative
-     * to the host's root.
-     * 
+     * GET the contents of the given path. The path is non-encoded, and it
+     * relative to the host's root.
+     *
      * @param path
      * @return
      * @throws com.ettrema.httpclient.HttpException
      * @throws NotAuthorizedException
      * @throws BadRequestException
      * @throws ConflictException
-     * @throws NotFoundException 
+     * @throws NotFoundException
      */
     public synchronized byte[] get(Path path) throws com.ettrema.httpclient.HttpException, NotAuthorizedException, BadRequestException, ConflictException, NotFoundException {
-        Path root = Path.path(rootPath);
-        Path p = root.add(path);
-        String url = buildEncodedUrl(p);
+        String url = buildEncodedUrl(path);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             transferService.get(url, new StreamReceiver() {
@@ -777,14 +779,14 @@ public class Host extends Folder {
         } catch (CancelledException ex) {
             throw new RuntimeException("Should never happen because no progress listener is set", ex);
         }
-        return out.toByteArray();        
+        return out.toByteArray();
     }
-    
+
     /**
      * Retrieve the bytes at the specified path.
      *
-     * @param path - encoded and relative to host's rootPath. Must NOT be slash prefixed
-     * as it will be appended to the host's url
+     * @param path - encoded and relative to host's rootPath. Must NOT be slash
+     * prefixed as it will be appended to the host's url
      * @return
      * @throws com.ettrema.httpclient.HttpException
      */
@@ -887,6 +889,17 @@ public class Host extends Folder {
 
     @Override
     public String href() {
+        String s = baseHref();
+        if (rootPath != null) {
+            s += rootPath;
+        }
+        if (!s.endsWith("/")) {
+            s += "/";
+        }
+        return s;
+    }
+
+    public String baseHref() {
         String s = "http";
         int defaultPort = 80;
         if (secure) {
@@ -898,17 +911,7 @@ public class Host extends Folder {
             s += ":" + this.port;
         }
 
-        if (rootPath != null && rootPath.length() > 0) {
-            if (!rootPath.startsWith("/")) {
-                s += "/";
-            }
-            s = s + rootPath;
-        } else {
-            s += "/";
-        }
-        if (!s.endsWith("/")) {
-            s += "/";
-        }
+        s += "/";
         return s;
     }
 
@@ -930,9 +933,12 @@ public class Host extends Folder {
 
     @Override
     public String encodedUrl() {
-        return href(); // for a Host, there are no un-encoded components (eg rootPath, if present, must be encoded)
+        String s = buildEncodedUrl(Path.root);
+        if (!s.endsWith("/")) {
+            s += "/";
+        }
+        return s;
     }
-
 
     public com.ettrema.httpclient.Folder getOrCreateFolder(Path remoteParentPath, boolean create) throws com.ettrema.httpclient.HttpException, IOException, NotAuthorizedException, ConflictException, BadRequestException, NotFoundException {
         log.trace("getOrCreateFolder: {}", remoteParentPath);
@@ -994,16 +1000,9 @@ public class Host extends Folder {
     }
 
     public String buildEncodedUrl(Path path) {
-        String url = this.encodedUrl();
-        String[] arr = path.getParts();
-        for (int i = 0; i < arr.length; i++) {
-            String s = arr[i];
-            if (i > 0) {
-                url += "/";
-            }
-            url += com.bradmcevoy.http.Utils.percentEncode(s);
-        }
-        return url;
+        Path base = Path.path(rootPath);
+        Path p = base.add(path);
+        return baseHref() + Utils.buildEncodedUrl(p);
     }
 
     public boolean isSecure() {
@@ -1020,20 +1019,20 @@ public class Host extends Folder {
 
     /**
      * TODO: should optimise so it only generates once per set of fields
-     * 
+     *
      * @param fields
-     * @return 
+     * @return
      */
     private String buildPropFindXml(List<QName> fields) {
         try {
-            if( fields == null ) {
+            if (fields == null) {
                 fields = defaultFields;
             }
             Element elPropfind = new Element("propfind", RespUtils.NS_DAV);
-            Document doc = new Document(elPropfind);        
+            Document doc = new Document(elPropfind);
             Element elProp = new Element("prop", RespUtils.NS_DAV);
             elPropfind.addContent(elProp);
-            for( QName qn : fields ) {
+            for (QName qn : fields) {
                 Element elName = new Element(qn.getLocalPart(), qn.getPrefix(), qn.getNamespaceURI());
                 elProp.addContent(elName);
             }
@@ -1045,9 +1044,7 @@ public class Host extends Folder {
             throw new RuntimeException(ex);
         }
     }
-    
-            
-            
+
     static class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
 
         @Override
