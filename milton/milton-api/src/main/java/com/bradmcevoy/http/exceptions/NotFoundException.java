@@ -30,7 +30,7 @@ public class NotFoundException extends MiltonException {
 
 	
     public NotFoundException(String reason) {
-        super();
+        super(reason);
         this.reason = reason;
     }	
 

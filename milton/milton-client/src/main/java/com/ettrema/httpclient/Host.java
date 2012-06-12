@@ -533,16 +533,18 @@ public class Host extends Folder {
      * @throws IOException
      * @throws com.ettrema.httpclient.HttpException
      */
-    public synchronized List<PropFindResponse> _doPropFind(String url, final int depth, List<QName> fields) throws IOException, com.ettrema.httpclient.HttpException, NotAuthorizedException, BadRequestException {
+    public synchronized List<PropFindResponse> _doPropFind(final String url, final int depth, List<QName> fields) throws IOException, com.ettrema.httpclient.HttpException, NotAuthorizedException, BadRequestException {
         log.trace("doPropFind: " + url);
         notifyStartRequest();
         final PropFindMethod m = new PropFindMethod(url);
         m.addHeader("Depth", depth + "");
+        m.addHeader("Accept-Charset", "utf-8,*;q=0.1");
+        m.addHeader("Accept", "text/xml");
 
         try {
             if (fields != null) {
                 String propFindXml = buildPropFindXml(fields);
-                HttpEntity requestEntity = new StringEntity(propFindXml, "UTF-8");
+                HttpEntity requestEntity = new StringEntity(propFindXml, "text/xml", "UTF-8");
                 m.setEntity(requestEntity);
             }
 
@@ -571,7 +573,7 @@ public class Host extends Folder {
                                     log.warn("Couldnt parse date header: " + sServerDate, ex);
                                 }
                             }
-
+                            //System.out.println("propfind: " + url);
                             buildResponses(document, serverDate, responses, depth);
 
                         }
@@ -606,12 +608,12 @@ public class Host extends Folder {
         for (Element el : responseEls) {
             if (!isFirst || depth == 0) { // if depth=0 must return first and only result
                 PropFindResponse resp = new PropFindResponse(serverDate, el);
+                //String href = resp.getHref();
                 responses.add(resp);
             } else {
                 isFirst = false;
             }
         }
-
     }
 
     public Document getResponseAsDocument(InputStream in) throws IOException {

@@ -150,11 +150,15 @@ public class HandlerHelper {
 		}
 		LockableResource lr = (LockableResource) inResource;
 		LockToken token = lr.getCurrentLock();
-		if (token != null) {
+		if (token != null ) {
 			Auth auth = inRequest.getAuthorization();
 			Object sUser = null;
 			if (auth != null) {
 				sUser = auth.getUser();
+			}
+			if( token.info == null ) {
+				log.warn("Found a lock on this resource, but it has no info property so is ignored");
+				return false;
 			}
 			String lockedByUser = token.info.lockedByUser;
 			if (lockedByUser == null) {
