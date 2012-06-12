@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ettrema</groupId>
 	<artifactId>milton</artifactId>
-	<version>1.8.1-SNAPSHOT</version>
+	<version>1.8.0.1</version>
 	<packaging>pom</packaging>
 	<name>Milton WebDav Parent</name>
 	<url>http://milton.ettrema.com</url>
@@ -35,16 +35,16 @@
 	</properties>
 	<licenses>
 		<license>
-            <name>GPL3</name>
-            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
-            <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
-        </license>
+			<name>GPL3</name>
+			<url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
 	</licenses>	
-    <organization>
-        <name>McEvoy Software Ltd</name>
-        <url>http://www.mcevoysoftware.co.nz/</url>
-    </organization>    	
+	<organization>
+		<name>McEvoy Software Ltd</name>
+		<url>http://www.mcevoysoftware.co.nz/</url>
+	</organization>    	
 	<modules>
 		<module>milton-api</module>
 		<module>milton-caldav</module>
@@ -66,7 +66,18 @@
         <module>milton-ajax-demo</module>        
         -->
 	</modules>
+	
 	<build>
+		<resources>
+			<resource>
+				<directory>${basedir}</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>LICENSE.txt</include>
+					<include>NOTICE.txt</include>
+				</includes>
+			</resource>	
+		</resources>		
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
