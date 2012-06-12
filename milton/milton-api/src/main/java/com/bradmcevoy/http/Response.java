@@ -101,6 +101,7 @@ public interface Response {
         SC_MULTI_STATUS( 207, "Multi-status" ),
         SC_MOVED_PERMANENTLY( ResponseStatus.SC_MOVED_PERMANENTLY ),
         SC_MOVED_TEMPORARILY( ResponseStatus.SC_MOVED_TEMPORARILY ),
+		SC_TEMPORARY_REDIRECT( ResponseStatus.SC_TEMPORARY_REDIRECT ),
         SC_NOT_MODIFIED( ResponseStatus.SC_NOT_MODIFIED ),
         SC_BAD_REQUEST( ResponseStatus.SC_BAD_REQUEST ),
         SC_UNAUTHORIZED( ResponseStatus.SC_UNAUTHORIZED ),
