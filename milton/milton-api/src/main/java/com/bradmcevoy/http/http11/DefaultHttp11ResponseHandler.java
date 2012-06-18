@@ -35,6 +35,7 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.bradmcevoy.http.exceptions.NotFoundException;
 import com.ettrema.sso.ExternalIdentityProvider;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -46,11 +47,17 @@ public class DefaultHttp11ResponseHandler implements Http11ResponseHandler, Buff
 	{
 		Properties props = new Properties();
 		try {
-			props.load(DefaultHttp11ResponseHandler.class.getResourceAsStream("/milton.properties"));
+			InputStream in = DefaultHttp11ResponseHandler.class.getResourceAsStream("/META-INF/maven/com.ettrema/milton-api/pom.properties");
+			if( in != null ) {
+				props.load(in);
+				miltonVerson = props.getProperty("version");
+			} else {
+				miltonVerson = "unknown.version";
+			}
 		} catch (IOException ex) {
-			log.warn("Failed lot load milton properties file", ex);
-		}
-		miltonVerson = props.getProperty("milton.version");
+			log.warn("Failed lot load maven properties file", ex);
+			miltonVerson = "unknown.version";
+		}		
 	}
 	
 	

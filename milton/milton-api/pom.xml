@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.ettrema</groupId>
 		<artifactId>milton</artifactId>
-		<version>1.8.0.1</version>
+		<version>1.8.0.2-SNAPSHOT</version>
 	</parent>
 	<groupId>com.ettrema</groupId>
 	<artifactId>milton-api</artifactId>
@@ -56,5 +56,12 @@
 			<version>1.8.2</version>
 		</dependency>
 	</dependencies>
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+	</build>	
 </project>
 
