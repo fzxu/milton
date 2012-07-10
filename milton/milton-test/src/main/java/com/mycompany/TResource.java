@@ -93,7 +93,7 @@ public abstract class TResource implements GetableResource, PropFindableResource
 
     public String getHref() {
         if( parent == null ) {
-            return "/webdav/";
+            return "/";
         } else {
             String s = parent.getHref();
             if( !s.endsWith( "/" ) ) s = s + "/";

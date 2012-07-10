@@ -16,13 +16,7 @@
  */
 package com.bradmcevoy.http.http11;
 
-import com.bradmcevoy.http.Request.Header;
-import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 import junit.framework.TestCase;
 
 import static org.easymock.classextension.EasyMock.*;

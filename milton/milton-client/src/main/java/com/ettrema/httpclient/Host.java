@@ -237,10 +237,13 @@ public class Host extends Folder {
      * @throws BadRequestException
      */
     public Folder getFolder(String path) throws IOException, com.ettrema.httpclient.HttpException, NotAuthorizedException, BadRequestException {
-        Resource res = find(path);
+        Resource res = find(path);        
         if (res instanceof Folder) {
             return (Folder) res;
         } else {
+            if( res == null ) {
+                return null;
+            }
             throw new RuntimeException("Not a folder: " + res.href());
         }
     }

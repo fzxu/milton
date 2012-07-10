@@ -36,7 +36,7 @@
 			the url mapping below to use it -->
     <servlet>
         <servlet-name>milton</servlet-name>
-        <servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
+        <servlet-class>com.mycompany.ScratchServlet</servlet-class>
         <init-param>
             <param-name>resource.factory.class</param-name>
             <param-value>com.mycompany.TResourceFactory</param-value>

@@ -79,7 +79,7 @@ public class WebDavProtocol implements HttpExtension, PropertySource {
     private final QuotaDataAccessor quotaDataAccessor;
     private final PropertyMap propertyMap;
     private final List<PropertySource> propertySources;
-    private final ETagGenerator eTagGenerator;
+    private ETagGenerator eTagGenerator;
     private final HandlerHelper handlerHelper;
     private DisplayNameFormatter displayNameFormatter = new DefaultDisplayNameFormatter();
 
@@ -587,5 +587,8 @@ public class WebDavProtocol implements HttpExtension, PropertySource {
         return propPatchHandler;
     }
 
-    
+	public void seteTagGenerator(ETagGenerator eTagGenerator) {
+		this.eTagGenerator = eTagGenerator;
+	}
+	    
 }

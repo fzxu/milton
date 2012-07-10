@@ -59,6 +59,9 @@ public class CustomFilter implements javax.servlet.Filter {
         TResourceFactory fact = new TResourceFactory();
         servletContext = filterConfig.getServletContext();
         httpManager = new HttpManager( fact );
+        
+        
+        
     }
 
     public void doFilter( javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse, FilterChain chain ) throws IOException, ServletException {

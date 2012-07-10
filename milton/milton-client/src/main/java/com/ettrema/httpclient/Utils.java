@@ -1,22 +1,21 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements.  See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership.  The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License.  You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
-
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.ettrema.httpclient;
 
 import com.bradmcevoy.common.Path;
@@ -48,11 +47,11 @@ public class Utils {
     private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
     /**
-     * Convert the path to a url encoded string, by url encoding each path of the
-     * path. Will not be suffixed with a slash
-     * 
+     * Convert the path to a url encoded string, by url encoding each path of
+     * the path. Will not be suffixed with a slash
+     *
      * @param path
-     * @return 
+     * @return
      */
     public static String buildEncodedUrl(Path path) {
         String url = "";
@@ -65,47 +64,52 @@ public class Utils {
             url += com.bradmcevoy.http.Utils.percentEncode(s);
         }
         return url;
-    }    
-    
+    }
+
     /**
-     * Execute the given request, populate any returned content to the outputstream,
-     * and return the status code
-     * 
+     * Execute the given request, populate any returned content to the
+     * outputstream, and return the status code
+     *
      * @param client
      * @param m
      * @param out - may be null
      * @return
-     * @throws IOException 
-     * 
+     * @throws IOException
+     *
      */
     public static int executeHttpWithStatus(HttpClient client, HttpUriRequest m, OutputStream out) throws IOException {
         HttpResult result = executeHttpWithResult(client, m, out);
+        if (log.isTraceEnabled()) {
+            for (String key : result.getHeaders().keySet()) {
+                log.trace(" header: " + key + " = " + result.getHeaders().get(key));
+            }
+        }
         return result.getStatusCode();
     }
-    
+
     public static HttpResult executeHttpWithResult(HttpClient client, HttpUriRequest m, OutputStream out) throws IOException {
         HttpResponse resp = client.execute(m);
         HttpEntity entity = resp.getEntity();
-        if( entity != null ) {
+        if (entity != null) {
             InputStream in = null;
             try {
                 in = entity.getContent();
-                if( out != null ) {
+                if (out != null) {
                     IOUtils.copy(in, out);
                 }
             } finally {
                 IOUtils.closeQuietly(in);
             }
         }
-        Map<String,String> mapOfHeaders = new HashMap<String, String>();
+        Map<String, String> mapOfHeaders = new HashMap<String, String>();
         Header[] respHeaders = resp.getAllHeaders();
-        for( Header h : respHeaders) {
+        for (Header h : respHeaders) {
             mapOfHeaders.put(h.getName(), h.getValue()); // TODO: should concatenate multi-valued headers
         }
         HttpResult result = new HttpResult(resp.getStatusLine().getStatusCode(), mapOfHeaders);
         return result;
-    }    
-    
+    }
+
     public static void close(InputStream in) {
         try {
             if (in == null) {
@@ -220,10 +224,10 @@ public class Utils {
 
     public static class CancelledException extends IOException {
     }
-    
-    public static String format (Map<String,String> parameters, final String encoding) {
+
+    public static String format(Map<String, String> parameters, final String encoding) {
         final StringBuilder result = new StringBuilder();
-        for ( Entry<String, String> p : parameters.entrySet()) {
+        for (Entry<String, String> p : parameters.entrySet()) {
             final String encodedName = encode(p.getKey(), encoding);
             final String value = p.getValue();
             final String encodedValue = value != null ? encode(value, encoding) : "";
@@ -245,12 +249,11 @@ public class Utils {
 //            throw new IllegalArgumentException(problem);
 //        }
 //    }
-
-    private static String encode (final String content, final String encoding) {
+    private static String encode(final String content, final String encoding) {
         try {
             return URLEncoder.encode(content, encoding != null ? encoding : HTTP.DEFAULT_CONTENT_CHARSET);
         } catch (UnsupportedEncodingException problem) {
             throw new IllegalArgumentException(problem);
         }
-    }    
+    }
 }
