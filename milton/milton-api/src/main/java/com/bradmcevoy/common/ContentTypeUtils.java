@@ -19,11 +19,10 @@
 
 package com.bradmcevoy.common;
 
-import eu.medsea.mimeutil.MimeException;
-import eu.medsea.mimeutil.MimeType;
-import eu.medsea.mimeutil.MimeUtil;
+import com.bradmcevoy.http.Utils;
 import java.io.File;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,53 +33,40 @@ import org.slf4j.LoggerFactory;
 public class ContentTypeUtils {
 
     private static Logger log = LoggerFactory.getLogger(ContentTypeUtils.class);
+    private static final ContentTypeService contentTypeService = new DefaultContentTypeService(); // will load props file ;
 
-    static {
-        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
-        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+
+    public static String findContentTypes(String name) {
+        List<String> list = contentTypeService.findContentTypes(name);
+        return buildContentTypeText(list);
     }
 
-    public static String findContentTypes( String name ) {
-        Collection mimeTypes = MimeUtil.getMimeTypes( name );
-        return mimeTypes.toString();
-        //return buildContentTypeText(mimeTypes);
+    public static String findContentTypes(File file) {
+        return buildContentTypeText(contentTypeService.findContentTypes(file.getName()));
     }
 
-    public static String findContentTypes( File file ) {
-        Collection mimeTypes = null;
-        try {
-            mimeTypes = MimeUtil.getMimeTypes( file.getName() );
-        } catch( MimeException e ) {
-            log.warn( "exception retrieving content type for file: " + file.getAbsolutePath(),e);
-            return "application/binary";
-        }
-        String s = mimeTypes.toString();
-        //String s = buildContentTypeText(mimeTypes);
-        log.trace( "findContentTypes: {}", file.getName(), mimeTypes);
-        return s;
+    public static String findAcceptableContentType(String canProvide, String accepts) {
+        return contentTypeService.getPreferedMimeType(accepts, toList(canProvide));
     }
 
-    public static String findAcceptableContentType(String mime, String preferredList) {
-        MimeType mt = MimeUtil.getPreferedMimeType(preferredList, mime);
-        return mt.toString();
-
+    public static String findAcceptableContentTypeForName(String name, String accepts) {
+        String canProvide = findContentTypes(name);
+        return contentTypeService.getPreferedMimeType(accepts, toList(canProvide));
+    }
+    
+    
+    private static String buildContentTypeText(List<String> mimeTypes) {
+        return Utils.toCsv(mimeTypes);
     }
 
-    private static String buildContentTypeText( Collection mimeTypes ) {
-        StringBuilder sb = null;
-        for( Object o : mimeTypes ) {
-            MimeType mt = (MimeType) o;
-            if( sb == null ) {
-                sb = new StringBuilder();
-            } else {
-                sb.append( "," );
+    public static List<String> toList(String s) {
+        List<String> list = new ArrayList<String>();
+        if( s != null ) {
+            for( String x : s.split(",")) {
+                x = x.trim();
+                list.add(x);
             }
-            sb.append( mt.toString() );
         }
-        if( sb == null ) {
-            return "";
-        } else {
-            return sb.toString();
-        }
+        return list;
     }
 }

@@ -33,6 +33,8 @@ public class GetHandlerTest extends TestCase {
 	GetHandler getHandler;
 	Http11ResponseHandler responseHandler;
 	HandlerHelper handlerHelper;
+	ETagGenerator eTagGenerator;
+	MatchHelper matchHelper;
 	
 	public GetHandlerTest(String testName) {
 		super(testName);
@@ -42,7 +44,9 @@ public class GetHandlerTest extends TestCase {
 	protected void setUp() throws Exception {
 		responseHandler = createMock(Http11ResponseHandler.class);
 		handlerHelper = createMock(HandlerHelper.class);
-		getHandler = new GetHandler(responseHandler, handlerHelper);
+		eTagGenerator = createMock(ETagGenerator.class);
+		matchHelper = new MatchHelper(eTagGenerator);
+		getHandler = new GetHandler(responseHandler, handlerHelper, matchHelper);
 	}
 
 	public void testProcess() throws Exception {

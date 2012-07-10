@@ -57,6 +57,8 @@ public interface Request {
         CACHE_CONTROL( "Cache-Control" ),
         WWW_AUTHENTICATE( "WWW-Authenticate" ),
         IF( "If" ),
+		IF_MATCH( "If-Match" ),
+		IF_NONE_MATCH( "If-None-Match" ),
         IF_MODIFIED( "If-Modified-Since" ),
         IF_NOT_MODIFIED( "If-Unmodified-Since" ),
         CONTENT_LENGTH( "Content-Length" ),
@@ -139,6 +141,10 @@ public interface Request {
     String getTimeoutHeader();
 
     String getIfHeader();
+	
+	String getIfMatchHeader();
+	
+	String getIfNoneMatchHeader();
 
     Date getIfModifiedHeader();
 

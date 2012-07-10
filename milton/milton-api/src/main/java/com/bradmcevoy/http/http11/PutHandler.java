@@ -19,6 +19,7 @@
 
 package com.bradmcevoy.http.http11;
 
+import com.bradmcevoy.common.ContentTypeService;
 import com.bradmcevoy.http.*;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotFoundException;
@@ -51,21 +52,24 @@ public class PutHandler implements Handler {
 	private final Http11ResponseHandler responseHandler;
 	private final HandlerHelper handlerHelper;
 	private final PutHelper putHelper;
+	private final MatchHelper matchHelper;
 
-	public PutHandler(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper) {
+	public PutHandler(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper, ContentTypeService contentTypeService, MatchHelper matchHelper) {
 		this.responseHandler = responseHandler;
 		this.handlerHelper = handlerHelper;
-		this.putHelper = new PutHelper();
+		this.putHelper = new PutHelper(contentTypeService);
+		this.matchHelper = matchHelper;
 		checkResponseHandler();
 	}
 
-	public PutHandler(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper, PutHelper putHelper) {
+	public PutHandler(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper, PutHelper putHelper, MatchHelper matchHelper) {
 		this.responseHandler = responseHandler;
 		this.handlerHelper = handlerHelper;
 		this.putHelper = putHelper;
+		this.matchHelper = matchHelper;
 		checkResponseHandler();
 	}
-
+	
 	private void checkResponseHandler() {
 		if (!(responseHandler instanceof WebDavResponseHandler)) {
 			log.warn("response handler is not a WebDavResponseHandler, so locking and quota checking will not be enabled");
@@ -106,6 +110,12 @@ public class PutHandler implements Handler {
 				log.warn("resource is locked, but not by the current user");
 				respondLocked(request, response, existingResource);
 				return;
+			}
+			// Check if the resource has been modified based on etags
+			if( !matchHelper.checkIfMatch(existingResource, request)) {
+				log.info("if-match comparison failed, aborting PUT request");
+				responseHandler.respondPreconditionFailed(request, response, existingResource);
+				return ;
 			}
 			Resource parent = manager.getResourceFactory().getResource(host, path.getParent().toString());
 			if (parent instanceof CollectionResource) {

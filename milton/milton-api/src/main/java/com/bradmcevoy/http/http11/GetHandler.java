@@ -39,10 +39,12 @@ public class GetHandler implements ExistingEntityHandler {
     private final HandlerHelper handlerHelper;
     private final ResourceHandlerHelper resourceHandlerHelper;
 	private final PartialGetHelper partialGetHelper;
+	private final MatchHelper matchHelper;
 
-    public GetHandler( Http11ResponseHandler responseHandler, HandlerHelper handlerHelper ) {
+    public GetHandler( Http11ResponseHandler responseHandler, HandlerHelper handlerHelper, MatchHelper matchHelper ) {
         this.responseHandler = responseHandler;
         this.handlerHelper = handlerHelper;
+		this.matchHelper = matchHelper;
         this.resourceHandlerHelper = new ResourceHandlerHelper( handlerHelper, responseHandler );
 		partialGetHelper = new PartialGetHelper(responseHandler);
     }
@@ -85,21 +87,16 @@ public class GetHandler implements ExistingEntityHandler {
             log.trace( "resource has null max age, so not modified response is disabled" );
             return false;
         }
-        if( checkIfMatch( resource, request ) ) {
-            return true;
-        }
         if( checkIfModifiedSince( resource, request ) ) {
             log.trace( "is not modified since" );
             return true;
         }
-        if( checkIfNoneMatch( resource, request ) ) {
+		// only proceed with the GET (ie return false) if there is no match
+        if( matchHelper.checkIfNoneMatch(resource, request) ) {
+			log.trace("conditional check, if-none-match returned true");
             return true;
         }
         return false;
-    }
-
-    private boolean checkIfMatch( GetableResource handler, Request requestInfo ) {
-        return false;   // TODO: not implemented
     }
 
     /**
@@ -159,9 +156,6 @@ public class GetHandler implements ExistingEntityHandler {
         }
     }
 
-    private boolean checkIfNoneMatch( GetableResource handler, Request requestInfo ) {
-        return false;   // TODO: not implemented
-    }
 
     @Override
     public String[] getMethods() {

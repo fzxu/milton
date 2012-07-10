@@ -31,6 +31,7 @@ import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Response;
 import com.bradmcevoy.http.ServletRequest;
 import com.bradmcevoy.http.ServletResponse;
+import javax.servlet.ServletContext;
 
 
 
@@ -51,9 +52,12 @@ public class CustomFilter implements javax.servlet.Filter {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CustomFilter.class);
 
     private HttpManager httpManager;
+    
+    private ServletContext servletContext;
 
     public void init( FilterConfig filterConfig ) throws ServletException {
         TResourceFactory fact = new TResourceFactory();
+        servletContext = filterConfig.getServletContext();
         httpManager = new HttpManager( fact );
     }
 
@@ -67,7 +71,7 @@ public class CustomFilter implements javax.servlet.Filter {
         if( !url.endsWith( ".jsp") ) {
             log.debug( "not a JSP, use milton");
             try {
-                Request request = new ServletRequest( req );
+                Request request = new ServletRequest( req, servletContext );
                 Response response = new ServletResponse( resp );
                 httpManager.process( request, response );
             } finally {

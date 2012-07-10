@@ -19,6 +19,8 @@
 
 package com.bradmcevoy.http.http11;
 
+import com.bradmcevoy.common.ContentTypeService;
+import com.bradmcevoy.common.DefaultContentTypeService;
 import com.bradmcevoy.http.Handler;
 import com.bradmcevoy.http.HandlerHelper;
 import com.bradmcevoy.http.HttpExtension;
@@ -50,19 +52,38 @@ public class Http11Protocol implements HttpExtension{
      * @param handlerHelper
      */
     public Http11Protocol(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper) {
-        this(responseHandler, handlerHelper, false );
+        this(responseHandler, handlerHelper, null, false, null );
     }
 
-    public Http11Protocol(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper, boolean enableOptionsAuth) {
+    public Http11Protocol(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper, ContentTypeService contentTypeService) {
+        this(responseHandler, handlerHelper, contentTypeService, false, null );
+    }
+	
+	/**
+	 * 
+	 * @param responseHandler
+	 * @param handlerHelper
+	 * @param contentTypeService - if null, a DefaultContentTypeService is created
+	 * @param enableOptionsAuth 
+	 */
+    public Http11Protocol(Http11ResponseHandler responseHandler, HandlerHelper handlerHelper, ContentTypeService contentTypeService, boolean enableOptionsAuth, ETagGenerator eTagGenerator) {
         this.handlers = new HashSet<Handler>();
         this.handlerHelper = handlerHelper;
+		if( contentTypeService == null ) {
+			contentTypeService = new DefaultContentTypeService();
+		}
+		if( eTagGenerator == null ) {
+			eTagGenerator = new DefaultETagGenerator();
+		}
+		MatchHelper matchHelper = new MatchHelper(eTagGenerator);
         handlers.add(new OptionsHandler(responseHandler, handlerHelper, enableOptionsAuth));
-        handlers.add(new GetHandler(responseHandler, handlerHelper));
+        handlers.add(new GetHandler(responseHandler, handlerHelper, matchHelper));
         handlers.add(new PostHandler(responseHandler, handlerHelper));
         handlers.add(new DeleteHandler(responseHandler, handlerHelper));
-        handlers.add(new PutHandler(responseHandler, handlerHelper));
+        handlers.add(new PutHandler(responseHandler, handlerHelper, contentTypeService, matchHelper));
     }
 
+	@Override
     public Set<Handler> getHandlers() {
         return handlers;
     }
@@ -71,6 +92,7 @@ public class Http11Protocol implements HttpExtension{
         return handlerHelper;
     }
 
+	@Override
     public List<CustomPostHandler> getCustomPostHandlers() {
         return customPostHandlers;
     }

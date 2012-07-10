@@ -136,6 +136,17 @@ public abstract class AbstractRequest implements Request {
         if( s == null || s.length() == 0 ) return null;
         return "T".equals( s );
     }
+	
+	@Override
+	public String getIfMatchHeader() {
+		return getRequestHeader( Header.IF_MATCH );
+	}
+
+	@Override
+	public String getIfNoneMatchHeader() {
+		return getRequestHeader( Header.IF_NONE_MATCH );
+	}
+	
 
     public String getAbsolutePath() {
         return stripToPath( getAbsoluteUrl() );
@@ -163,5 +174,6 @@ public abstract class AbstractRequest implements Request {
 
     public Map<String, FileItem> getFiles() {
         return (Map<String, FileItem>) attributes.get( "_files" );
-    }
+    }	
+	
 }
