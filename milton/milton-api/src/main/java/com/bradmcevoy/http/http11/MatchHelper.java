@@ -57,7 +57,8 @@ public class MatchHelper {
 		}
 		List<String> etags = splitToList(h);
 		for (String requestedEtag : etags) {
-			if (requestedEtag.equals(currentEtag)) {
+			String sanitized = requestedEtag.replaceAll("\"", "");
+			if (sanitized.equals(currentEtag)) {
 				return true;
 			}
 		}
