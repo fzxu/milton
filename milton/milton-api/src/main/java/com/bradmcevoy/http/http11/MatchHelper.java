@@ -45,13 +45,15 @@ public class MatchHelper {
 	 * @return
 	 */
 	public boolean checkIfMatch(Resource r, Request req) {
-		String h = req.getIfMatchHeader();
-		if (h == null) {
-			return false;
-		}
 		String currentEtag = eTagGenerator.generateEtag(r);
 		if (currentEtag == null) {
 			return false;
+		}
+		
+		String h = req.getIfMatchHeader();
+		if (h == null) {
+			// it is too aggressive to set false
+			return true;
 		}
 		List<String> etags = splitToList(h);
 		for (String requestedEtag : etags) {
